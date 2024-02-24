@@ -1,20 +1,19 @@
-import { connect, connection } from 'mongoose';
+import { connect, connection } from "mongoose";
 
 const conn = {
-    isConnected: false,
+  isConnected: false,
 };
 
 export async function connectDB() {
-    if (conn.isConnected) return;
-    const db = await connect('mongodb://localhost/nextmongocrud');
-    console.log(db.connection.db.databaseName);
-    conn.isConnected = db.connections[0].readyState;
+  if (conn.isConnected) return;
+  const db = await connect("mongodb://localhost/nextmongocrud");
+  conn.isConnected = db.connections[0].readyState;
 }
 
-connection.on('connected', () => {
-    console.log('Mongoose is connected');
+connection.on("connected", () => {
+  console.log("Mongoose is connected");
 });
 
-connection.on('error', (err) => {
-    console.log('Mongoose connection error: ', err);
+connection.on("error", (err) => {
+  console.log("Mongoose connection error: ", err);
 });
