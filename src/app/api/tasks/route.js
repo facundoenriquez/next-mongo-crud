@@ -10,6 +10,7 @@ export async function GET() {
 
 export async function POST(request) {
   try {
+    connectDB();
     const data = await request.json();
     const newTask = new Task(data);
     const savedTask = await newTask.save();
