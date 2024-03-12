@@ -1,5 +1,8 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import { connectDB } from '@/utils/mongoose';
+import User from '@/models/user';
+import bcrypt from 'bcryptjs';
 
 const handler = NextAuth({
     providers: [
@@ -20,21 +23,31 @@ const handler = NextAuth({
             },
             async authorize(credentials, req) {
                 // Agregue lógica aquí para buscar el usuario a partir de las credenciales proporcionadas.
-                const user = {
-                    id: '1',
-                    name: 'J Smith',
-                    email: 'jsmith@example.com',
-                };
+                connectDB();
+                console.log(credentials);
+                const userFound = await User.findOne({
+                    email: credentials?.email,
+                }).select('+password');
+                if (!userFound) throw new Error('Invalid credentials');
+                console.log(userFound);
+                const passwordMatch = await bcrypt.compare(
+                    credentials?.password,
+                    userFound.password
+                );
 
-                if (user) {
-                    // Cualquier objeto devuelto se guardará en la propiedad `usuario` del JWT
-                    console.log(user);
-                    return user;
-                } else {
-                    // Si devuelve nulo, se mostrará un error advirtiendo al usuario que verifique sus detalles.
-                    return null;
-                    // También puedes rechazar esta devolución de llamada con un error, por lo que el usuario será enviado a la página de error con el mensaje de error como parámetro de consulta.
-                }
+                if (!passwordMatch) throw new Error('Invalid credentials');
+                console.log(userFound);
+                return userFound;
+
+                // if (userFound) {
+                //     Cualquier objeto devuelto se guardará en la propiedad `usuario` del JWT
+                //     console.log(userFound);
+                //     return userFound;
+                // } else {
+                //     Si devuelve nulo, se mostrará un error advirtiendo al usuario que verifique sus detalles.
+                //     return null;
+                //     También puedes rechazar esta devolución de llamada con un error, por lo que el usuario será enviado a la página de error con el mensaje de error como parámetro de consulta.
+                // }
             },
         }),
     ],
@@ -48,6 +61,9 @@ const handler = NextAuth({
             console.log(session, token);
             return session;
         },
+    },
+    pages: {
+        signIn: '/login',
     },
 });
 

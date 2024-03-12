@@ -1,19 +1,32 @@
 'use client';
 import axios, { AxiosError } from 'axios';
 import { useState } from 'react';
+import { signIn } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const RegisterPage = () => {
     const [error, setError] = useState();
+
+    const router = useRouter();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const formData = new FormData(e.currentTarget);
         try {
-            const user = await axios.post('/api/auth/signup', {
+            const signupResponse = await axios.post('/api/auth/signup', {
                 email: formData.get('email'),
                 fullname: formData.get('fullname'),
                 password: formData.get('password'),
             });
+
+            const res = await signIn('credentials', {
+                email: signupResponse.data.email,
+                password: formData.get('password'),
+                redirect: false,
+            });
+
+            if (res.ok) return router.push('/dashboard');
+
             setError(null);
         } catch (error) {
             console.log(error);
@@ -28,9 +41,12 @@ const RegisterPage = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSubmit}>
-                <h1>Signup</h1>
+        <div className='justify-center h-[calc(100vh-4rem)] flex items-center'>
+            <form
+                onSubmit={handleSubmit}
+                className='bg-neutral-950 px-8 py-10 w-3/12'
+            >
+                <h1 className='text-4xl font-bold mb-7'>SignUp</h1>
 
                 {error && (
                     <div
@@ -58,19 +74,19 @@ const RegisterPage = () => {
                     type='text'
                     name='fullname'
                     placeholder='fullname'
-                    className='bg-zinc-800 px-4 py-2 block mb-2'
+                    className='bg-zinc-800 px-4 py-2 block mb-2 w-full'
                 />
                 <input
                     type='text'
                     name='email'
                     placeholder='somemail@mail.com'
-                    className='bg-zinc-800 px-4 py-2 block mb-2'
+                    className='bg-zinc-800 px-4 py-2 block mb-2 w-full'
                 />
                 <input
                     type='text'
                     name='password'
                     placeholder='********'
-                    className='bg-zinc-800 px-4 py-2 block mb-2'
+                    className='bg-zinc-800 px-4 py-2 block mb-2 w-full'
                 />
                 <button className='bg-indigo-500 px-4 py-2'>Register</button>
             </form>
