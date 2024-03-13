@@ -1,5 +1,6 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { connectDB } from '@/utils/mongoose';
 import User from '@/models/user';
 import bcrypt from 'bcryptjs';
@@ -24,7 +25,6 @@ const handler = NextAuth({
             async authorize(credentials, req) {
                 // Agregue lógica aquí para buscar el usuario a partir de las credenciales proporcionadas.
                 connectDB();
-                console.log(credentials);
                 const userFound = await User.findOne({
                     email: credentials?.email,
                 }).select('+password');
@@ -36,7 +36,6 @@ const handler = NextAuth({
                 );
 
                 if (!passwordMatch) throw new Error('Invalid credentials');
-                console.log(userFound);
                 return userFound;
 
                 // if (userFound) {
@@ -49,6 +48,10 @@ const handler = NextAuth({
                 //     También puedes rechazar esta devolución de llamada con un error, por lo que el usuario será enviado a la página de error con el mensaje de error como parámetro de consulta.
                 // }
             },
+        }),
+        GoogleProvider({
+            clientId: process.env.GOOGLE_CLIENT_ID,
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         }),
     ],
     callbacks: {

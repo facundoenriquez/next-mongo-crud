@@ -1,15 +1,27 @@
-import { getServerSession } from 'next-auth'
+'use client'
+import { signOut, useSession } from 'next-auth/react'
 import Link from "next/link"
+import { useEffect, useRef, useState } from 'react'
 
-const NavBar = async () => {
+const NavBar = () => {
 
-    const session = await getServerSession()
-    console.log(session)
-    let isOpen = false;
+    const { data: session, status } = useSession()
+    const [isOpen, setIsOpen] = useState(false)
+    const dropdownRef = useRef(null)
 
-    const toggleDropdown = () => {
-        isOpen = !isOpen;
+    const closeDropdownOnOutsideClick = (event) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+            setIsOpen(false);
+        }
     };
+
+    useEffect(() => {
+        document.addEventListener('click', closeDropdownOnOutsideClick);
+
+        return () => {
+            document.removeEventListener('click', closeDropdownOnOutsideClick);
+        };
+    }, []);
 
     return (
         <nav className="bg-gray-800 py-5 mb-2">
@@ -17,7 +29,7 @@ const NavBar = async () => {
                 <Link href="/">
                     <h1 className="text-2xl font-bold">NextMongo/Auth</h1>
                 </Link>
-                {session === null
+                {session === null || typeof session === 'undefined'
                     ?
                     <ul className="flex gap-x-4">
                         <li>
@@ -37,11 +49,13 @@ const NavBar = async () => {
                         </li>
                         <li>
 
-                            <button id="dropdownUserAvatarButton"
+                            <button
+                                ref={dropdownRef}
+                                id="dropdownUserAvatarButton"
                                 data-dropdown-toggle="dropdownAvatar"
                                 className="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
                                 type="button"
-                                // onClick={toggleDropdown}
+                                onClick={() => setIsOpen(!isOpen)}
                             >
                                 <span className="sr-only">Open user menu</span>
                                 <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/logo.svg" alt="user photo" />
@@ -56,13 +70,16 @@ const NavBar = async () => {
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownUserAvatarButton">
                                     <li>
                                         <Link
-                                            // onClick={toggleDropdown}
                                             href={'/dashboard'}
                                             className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Dashboard</Link>
                                     </li>
                                 </ul>
-                                <div className="py-2">
-                                    <Link href={"/api/auth/signout"} className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white">Sign out</Link>
+                                <div className="py-2 text-sm text-gray-700 dark:text-gray-200">
+                                    <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white w-full text-left"
+                                        onClick={() => signOut()}
+                                    >
+                                        Sign out
+                                    </button>
                                 </div>
                             </div>
                         </li>
@@ -71,7 +88,7 @@ const NavBar = async () => {
                 }
 
             </div>
-        </nav>
+        </nav >
     )
 }
 export default NavBar
