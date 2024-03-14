@@ -58,14 +58,21 @@ const NavBar = () => {
                                 onClick={() => setIsOpen(!isOpen)}
                             >
                                 <span className="sr-only">Open user menu</span>
-                                <img className="w-8 h-8 rounded-full" src="https://flowbite.com/docs/images/logo.svg" alt="user photo" />
+                                {session?.user.image
+                                    ?
+                                    <img className="w-8 h-8 rounded-full" src={`${session?.user.image}`} alt="user photo" />
+                                    :
+                                    <img className="w-8 h-8 rounded-full" src="https://i0.wp.com/digitalhealthskills.com/wp-content/uploads/2022/11/3da39-no-user-image-icon-27.png?fit=500%2C500&ssl=1" alt="user photo" />
+                                }
+
+
                             </button>
 
                             <div id="dropdownAvatar" className={`${isOpen ? 'block' : 'hidden'
                                 } z-10 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700 dark:divide-gray-600 absolute top-18 right-7`}>
                                 <div className="px-4 py-3 text-sm text-gray-900 dark:text-white">
-                                    <div>Bonnie Green</div>
-                                    <div className="font-medium truncate">name@flowbite.com</div>
+                                    <div>{session?.user.name}</div>
+                                    <div className="font-medium truncate">{session?.user.email}</div>
                                 </div>
                                 <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownUserAvatarButton">
                                     <li>
@@ -76,7 +83,9 @@ const NavBar = () => {
                                 </ul>
                                 <div className="py-2 text-sm text-gray-700 dark:text-gray-200">
                                     <button className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white w-full text-left"
-                                        onClick={() => signOut()}
+                                        onClick={() => signOut({
+                                            callbackUrl: "/login"
+                                        })}
                                     >
                                         Sign out
                                     </button>

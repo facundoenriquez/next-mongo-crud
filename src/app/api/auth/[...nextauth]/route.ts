@@ -61,7 +61,6 @@ const handler = NextAuth({
         },
         session({ session, token }) {
             session.user = token.user;
-            console.log(session, token);
             return session;
         },
     },
